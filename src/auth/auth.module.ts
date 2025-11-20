@@ -6,6 +6,8 @@ import { SessionService } from '../session/session.service';
 import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { getRecaptchaConfig } from '../config/recaptcha.config';
+import { MailModule } from '../libs/mail/mail.module';
+import { EmailConfirmationService } from './email-confirmation/email-confirmation.service';
 
 @Module({
   imports: [
@@ -14,8 +16,14 @@ import { getRecaptchaConfig } from '../config/recaptcha.config';
       useFactory: getRecaptchaConfig,
       inject: [ConfigService],
     }),
+    MailModule,
   ],
   controllers: [AuthController],
-  providers: [AuthService, UserService, SessionService],
+  providers: [
+    AuthService,
+    UserService,
+    SessionService,
+    EmailConfirmationService,
+  ],
 })
 export class AuthModule {}

@@ -19,7 +19,6 @@ model User {
 
   role UserRole @default(REGULAR)
 
-  isVerified        Boolean @default(false) @map("is_verified")
   isTwoFactorEnable Boolean @default(false) @map("is_two_factor_enable")
 
   method AuthMethod
@@ -76,5 +75,5 @@ enum AuthMethod {
 enum TokenType {
   VERIFICATION
   TWO_FACTOR
-  PASSWORD_TYPE
+  PASSWORD_RESET
 }

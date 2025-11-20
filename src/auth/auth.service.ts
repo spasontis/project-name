@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   ConflictException,
   Injectable,
   NotFoundException,
@@ -10,27 +11,36 @@ import { LoginDto } from './dto';
 
 import { UserService } from '../user/user.service';
 import { AuthMethod } from '../../generated/prisma';
+import { SessionService } from '../session/session.service';
 
 import { verify } from 'argon2';
-import { SessionService } from '../session/session.service';
+import { EmailConfirmationService } from './email-confirmation/email-confirmation.service';
 
 @Injectable()
 export class AuthService {
   public constructor(
     private readonly userService: UserService,
     private readonly sessionService: SessionService,
+    private readonly emailConfirmationService: EmailConfirmationService,
   ) {}
 
   public async register(dto: RegisterDto) {
     const isLoginExists = await this.userService.findByLogin(dto.login);
-    const isEmailExists = await this.userService.findByEmail(dto.email);
+    const isEmailVerified =
+      await this.emailConfirmationService.isVerificationTokenMatch({
+        email: dto.email,
+        token: dto.token,
+      });
 
     if (isLoginExists) {
       throw new ConflictException('Login already exists');
     }
-    if (isEmailExists) {
-      throw new ConflictException('Email already exists');
+
+    if (!isEmailVerified) {
+      throw new BadRequestException('Token is expired');
     }
+
+    await this.emailConfirmationService.deleteisVerificationToken(dto.email);
 
     const newUser = await this.userService.create(
       dto.login,
@@ -38,7 +48,6 @@ export class AuthService {
       dto.password,
       '',
       AuthMethod.CREDENTIALS,
-      false,
     );
 
     return {
