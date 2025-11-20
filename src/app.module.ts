@@ -6,6 +6,8 @@ import { IS_DEV_ENV } from './libs/common/utils/is-dev.util';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { SessionModule } from './session/session.module';
+import { MailModule } from './libs/mail/mail.module';
+import { EmailConfirmationModule } from './auth/email-confirmation/email-confirmation.module';
 
 @Module({
   imports: [
@@ -17,6 +19,8 @@ import { SessionModule } from './session/session.module';
     AuthModule,
     UserModule,
     SessionModule,
+    MailModule,
+    EmailConfirmationModule,
   ],
 })
 export class AppModule {}
