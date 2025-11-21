@@ -1,13 +1,16 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
-import { UserService } from '../user/user.service';
-import { SessionService } from '../session/session.service';
 import { GoogleRecaptchaModule } from '@nestlab/google-recaptcha';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { getRecaptchaConfig } from '../config/recaptcha.config';
-import { MailModule } from '../libs/mail/mail.module';
-import { EmailConfirmationService } from './email-confirmation/email-confirmation.service';
+
+import { getRecaptchaConfig } from '../configs/recaptcha';
+import { MailModule } from '../libs/mail';
+import { UserService } from '../user';
+import { SessionService } from '../session';
+
+import { AuthController } from './auth.controller';
+import { EmailConfirmationService } from './email-confirmation';
+import { RegisterService } from './register';
+import { LoginService } from './login';
 
 @Module({
   imports: [
@@ -20,7 +23,8 @@ import { EmailConfirmationService } from './email-confirmation/email-confirmatio
   ],
   controllers: [AuthController],
   providers: [
-    AuthService,
+    RegisterService,
+    LoginService,
     UserService,
     SessionService,
     EmailConfirmationService,

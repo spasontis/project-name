@@ -8,6 +8,8 @@ import { UserModule } from './user/user.module';
 import { SessionModule } from './session/session.module';
 import { MailModule } from './libs/mail/mail.module';
 import { EmailConfirmationModule } from './auth/email-confirmation/email-confirmation.module';
+import { RegisterModule } from './auth/register/register.module';
+import { LoginModule } from './auth/login/login.module';
 
 @Module({
   imports: [
@@ -21,6 +23,8 @@ import { EmailConfirmationModule } from './auth/email-confirmation/email-confirm
     SessionModule,
     MailModule,
     EmailConfirmationModule,
+    RegisterModule,
+    LoginModule,
   ],
 })
 export class AppModule {}

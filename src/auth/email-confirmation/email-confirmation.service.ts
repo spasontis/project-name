@@ -4,7 +4,6 @@ import {
   Injectable,
 } from '@nestjs/common';
 
-import { UserService } from '../../user/user.service';
 import { MailService } from '../../libs/mail/mail.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { TokenType } from '../../../generated/prisma';
@@ -12,16 +11,17 @@ import { TokenType } from '../../../generated/prisma';
 import { VerifyDto } from '../dto';
 
 import { registerMessage, registerTitle } from './messages/register.message';
+import { UserService } from '../../user';
 
 @Injectable()
 export class EmailConfirmationService {
   public constructor(
-    private readonly userService: UserService,
     private readonly mailService: MailService,
     private readonly prismaService: PrismaService,
+    private readonly userService: UserService,
   ) {}
 
-  public async sendVerificationToken(email: string): Promise<void> {
+  public async sendRegisterVerificationToken(email: string): Promise<void> {
     const isEmailExists = await this.userService.findByEmail(email);
 
     if (isEmailExists) {
@@ -44,7 +44,7 @@ export class EmailConfirmationService {
 
   public async generateVerificationToken(email: string) {
     const token = Math.floor(100000 + Math.random() * 900000).toString();
-    const expiresIn = new Date(new Date().getTime() + 3600 * 1000);
+    const expiresIn = new Date(new Date().getTime() + 15 * 60 * 1000);
     const existingToken = await this.prismaService.token.findFirst({
       where: {
         email,
