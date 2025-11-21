@@ -2,27 +2,37 @@ import {
   BadRequestException,
   ConflictException,
   Injectable,
-  NotFoundException,
-  UnauthorizedException,
 } from '@nestjs/common';
 
-import { RegisterDto } from './dto';
-import { LoginDto } from './dto';
+import { AuthMethod } from '../../../generated/prisma';
+import { UserService } from '../../user';
+import { SessionService } from '../../session';
 
-import { UserService } from '../user/user.service';
-import { AuthMethod } from '../../generated/prisma';
-import { SessionService } from '../session/session.service';
-
-import { verify } from 'argon2';
-import { EmailConfirmationService } from './email-confirmation/email-confirmation.service';
+import { EmailConfirmationService } from '../email-confirmation';
+import { EmailDto, RegisterDto, VerifyDto } from '../dto';
 
 @Injectable()
-export class AuthService {
+export class RegisterService {
   public constructor(
+    private readonly emailConfirmationService: EmailConfirmationService,
     private readonly userService: UserService,
     private readonly sessionService: SessionService,
-    private readonly emailConfirmationService: EmailConfirmationService,
   ) {}
+
+  public async sendCode(dto: EmailDto) {
+    await this.emailConfirmationService.generateVerificationToken(dto.email);
+    await this.emailConfirmationService.sendRegisterVerificationToken(
+      dto.email,
+    );
+
+    return { message: 'Verification code was sent to email.' };
+  }
+
+  public async verifyEmail(dto: VerifyDto) {
+    await this.emailConfirmationService.isVerificationTokenMatch(dto);
+
+    return { message: 'Email successfully verified.' };
+  }
 
   public async register(dto: RegisterDto) {
     const isLoginExists = await this.userService.findByLogin(dto.login);
@@ -56,31 +66,6 @@ export class AuthService {
         login: newUser.login,
         email: newUser.email,
         role: newUser.role,
-      }),
-    };
-  }
-
-  public async login(dto: LoginDto) {
-    const user = await this.userService.findByLogin(dto.login);
-
-    if (!user || !user.password) {
-      throw new NotFoundException('User not found');
-    }
-
-    const isValidPassword = await verify(user.password, dto.password);
-
-    if (!isValidPassword) {
-      throw new UnauthorizedException(
-        'Wrong password. Try again or reset your pasword',
-      );
-    }
-
-    return {
-      accessToken: await this.sessionService.encrypt({
-        sub: user.id,
-        login: user.login,
-        email: user.email,
-        role: user.role,
       }),
     };
   }
